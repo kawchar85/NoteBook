@@ -1,8 +1,3 @@
-#include<bits/stdc++.h>
-using namespace std;
-typedef long long ll;
-
-
 const int base = 1000000000; const int base_digits = 9;
 struct bigint {
   vector<int> a; int sign; bigint() : sign(1) {}
