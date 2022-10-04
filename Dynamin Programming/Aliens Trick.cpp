@@ -1,4 +1,3 @@
-theorem:area=In+(on_boundary/2)-1;in=strictly inside polygon
 pair<ll,ll> solveWithPenalty(ll p){
   //add p with targets
   ll ans=0,cnt=0;
