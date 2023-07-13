@@ -1,10 +1,7 @@
-/* longest suffix ending at pos i which is also a prefix
-pattern t and text s, so to find make new string 
-ss = t+"#"+s and see which ind gives len = size of t*/
 /*π[i]=the longest length of a substring ending in position
 i, that coincides with the prefix.
-search: if(pi[i]==n) pos=i-2n.
-compress: k=n-pi[n-1],if(n%k==0) ans=k
+search: n=s.size(); s=s+"#"+t;if(pi[i]==n) pos=i-2n.
+compress: k=n-pi[n-1],if(n%k==0) ans=k, else ans = n
 pali pref: s=s+'#'+rev, pi[s.size()-1];
 pali suf: s=rev+'#'+s, pi[s.size()-1]; */
 vector<int> prefix_function(string s){
