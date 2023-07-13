@@ -34,3 +34,23 @@ struct Palindromic_Tree{
     endHere[1]=endHere[2]=0; idx = t = 2; total=0; s="#";}
   int cntDistinct(){ return idx-2; }
   int cntTotal(){ return total; }  };
+//counting
+vi suf;//suf[i]= # pali end at i
+vi pref;//pref[i]= #pali start from i
+p.init(s, suf); p.clear();
+reverse(s);p.init(s,pref);reverse(pref);
+void init(string &ss, vi &v) {
+  //...//palindrom end in pos i=endHere[t]
+  v.push_back(endHere[t]); /*....*/ }
+void add(int p, int sId) {
+  /*...*/ occ[t][sId]++; }
+ll init(string &s1, string &s2) {
+  ll commonPal=0LL; s+=s1; n=s.size();
+  add(i, 0) for i = [1,n-1]
+  s+=char('a'+26); s+=s2; n2=s.size();
+  add(i, 1); for i = [n, n2-1]
+  for(int i = idx; i > 2; i--){
+    occ[link[i]][0] += occ[i][0];
+    occ[link[i]][1] += occ[i][1];
+    commonPal+=1LL*occ[i][0]*occ[i][1]; }
+  return commonPal; }
