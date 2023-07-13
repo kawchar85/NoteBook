@@ -38,11 +38,3 @@ void deleteFromTrie(int n){
     if(data[cur].cnt[now]==0){data[cur].next[now]=0; break;}
     cur=data[cur].next[now]; } }
 void delete_trie(){ counter=1; memset(tree,0,sizeof tree); }
-//Samaun Bhai
-int n,m,k,a[siz],t[siz][26],node = 1;
-void in(string s){/*inserting string into the trie*/
-  int cur = 0;
-  for(int i = 0;i<s.size();i++){
-    if(t[cur][s[i]-'a'] == 0){ t[cur][s[i]-'a'] = node++;}
-    cur = t[cur][s[i]-'a']; //go to new node
-  } }
