@@ -1,66 +1,107 @@
-/*array values can be negative too, use appropriate minimum
-and maximum value. internal array of size (max-min). if 
-need, compressed main array. use 1-based index. 
-call: wavelet_tree wt(A+1, A+n+1); beware! after the
-init() operation array A[] will not be same */
-#define maxN 200005
-#define MAXV (int)1e6
-#define MINV 1
-int A[maxN];
-struct wavelet_tree{
-  int lo, hi; wavelet_tree *l, *r; vector<int> b, c;
-  wavelet_tree(int *from, int *to, int x=MINV, int y=MAXV){
-    lo=x, hi=y; if( from>=to ) return;
-    if( hi==lo ) {
-      b.reserve(to-from+1); b.push_back(0);
-      c.reserve(to-from+1); c.push_back(0);
-      for(auto it = from; it != to; it++) {
-          b.push_back(b.back() + 1);
-          c.push_back(c.back()+*it);  }
-      return; }
-    int mid = (lo+hi)/2;
-    auto f = [mid](int x) { return x <= mid; };
-    b.reserve(to-from+1); b.push_back(0);
-    c.reserve(to-from+1); c.push_back(0);
-    for(auto it = from; it != to; it++) {
-        b.push_back(b.back() + f(*it));
-        c.push_back(c.back() + *it); }
-    auto pivot = stable_partition(from, to, f);
-    l = new wavelet_tree(from, pivot, lo, mid);
-    r = new wavelet_tree(pivot, to, mid+1, hi); }
-  //swap A[i] with A[i+1], if A[i]!=A[i+1]
-  void swapadjacent(int i) {
-    if(lo == hi) return ;
-    b[i]= b[i-1] + b[i+1] - b[i];
-    c[i]= c[i-1] + c[i+1] - c[i];
-    if( b[i+1]-b[i] == b[i]-b[i-1]) {
-      if(b[i]-b[i-1]) return this->l->swapadjacent(b[i]);
-      else return this->r->swapadjacent(i-b[i]);
-    } else return;
+#define pii pair<int,int>
+#define x first
+#define y second
+int n;
+struct wavelet_tree {
+  static const int unfound = INT_MIN;
+  static const int maxn = 1e5 + 5;
+  static const int mlog = 20;
+  typedef int Int; typedef long long Long;
+  Int s[maxn], tree[mlog][maxn];
+  int L[mlog][maxn];
+  Long ls[mlog][maxn], sl;
+  Int & operator[](int x) {return tree[0][x];}
+  void build(int l = 1, int r = n, int d = 0) {
+    if (l == r)return;
+    int m=(l + r)>>1, cnt=0, lc=l, rc=m+1, ec=0;
+    for(int i=l; i<=r; i++) if(tree[d][i]<s[m])cnt++;
+    for (int i = l; i <= r; i++) {
+      if ( (tree[d][i] < s[m]) || (tree[d][i] == s[m] && ec < (m - l + 1 - cnt) ) ) {
+        tree[d + 1][lc++] = tree[d][i];
+        ls[d + 1][i] = ls[d+1][i-1]+tree[d][i];
+        if (tree[d][i] == s[m]) ec++;
+      } else {
+        tree[d + 1][rc++] = tree[d][i];
+        ls[d + 1][i] = ls[d + 1][i - 1];
+    } L[d][i] = L[d][l - 1] + lc - l;
+    } build(l, m, d + 1); build(m + 1, r, d + 1);
   }
-  //kth smallest element in [l, r]
-  int kth(int l, int r, int k) {
-    if(l>r) return 0; if(lo == hi) return lo;
-    int inLeft=b[r]-b[l-1]; int lb=b[l-1]; int rb=b[r]; 
-    if(k <= inLeft) return this->l->kth(lb+1, rb, k);
-    return this->r->kth(l-lb, r-rb, k-inLeft); }
-  //count of nos in [l, r] Less than or equal to k
-  int LTE(int l, int r, int k) {
-    if( (l>r) || (k<lo) ) return 0;
-    if(hi <= k) return (r-l+1);
-    int lb = b[l-1], rb = b[r];
-    return this->l->LTE(lb+1, rb, k) + this->r->LTE(l-lb, r-rb, k);  }
-  //count of nos in [l, r] equal to k
-  int count(int l, int r, int k) {
-    if( (l>r) || (k<lo) || (k>hi) ) return 0;
-    if(lo == hi) return (r-l+1);
-    int lb = b[l-1], rb = b[r], mid = (lo+hi)/2;
-    if(k <= mid) return this->l->count(lb+1, rb, k);
-    return this->r->count(l-lb, r-rb, k); }
-  //sum of nos in [l ,r] less than or equal to k
-  int sumk(int l, int r, int k) {
-    if( (l>r) || (k<lo) ) return 0;
-    if(hi <= k) return c[r] - c[l-1];
-    int lb = b[l-1], rb = b[r];
-    return this->l->sumk(lb+1, rb, k) + this->r->sumk(l-lb, r-rb, k); }
-  ~wavelet_tree() { delete l; delete r; } };
+  void init(Int *arr, int n) {
+    for(int i=1; i<=n; i++) tree[0][i] = arr[i]; init(n);
+  }
+  void init(int n) {
+    for(int i=1; i<=n; i++)s[i]=tree[0][i], ls[0][i]=ls[0][i-1]+s[i];
+    sort(s + 1, s + 1 + n); build();
+  }
+  Long sum(pii a,int d=0){return ls[d][a.y]-ls[d][a.x-1];}
+  int cn(pii a, int d) {return L[d][a.y] - L[d][a.x - 1];}
+  pii left(pii a, int d, int l) {return {l + cn({l, a.x-1}, d), l-1+cn({l, a.y}, d)};}
+  pii right(pii a, int d, int r) {return {a.x + cn({a.x, r}, d), a.y + cn({a.y+1, r}, d)};}
+  Int kth(int x,int y,int k,int l=1, int r=n, int d=0) {
+  if (y - x + 1 < k || x > y)return unfound;
+    if (l == r) {
+      sl += tree[d][l]; return tree[d][l];
+    } int cnt = cn({x, y}, d), m = (l + r) >> 1, nx, ny;
+    if (cnt >= k) {
+      tie(nx, ny) = left({x, y}, d, l);
+      return kth(nx, ny, k, l, m, d + 1);
+    } else {
+      sl += sum({x, y}, d+1); tie(nx, ny)=right({x,y},d,r);
+      return kth(nx, ny, k - cnt, m + 1, r, d + 1);
+    }
+  }
+  int leq(int x, int y, Int k, int l=1, int r=n, int d=0){
+    if (x > y)return 0;
+    if (l == r) {
+      if (l > y || l < x)return 0; // is it important?
+      sl += tree[d][l] * (tree[d][l] <= k);
+      return tree[d][l] <= k;
+    } int cnt = cn({x, y}, d), m = (l + r) >> 1, nx, ny;
+    if (s[m] <= k) {
+      sl += sum({x,y}, d+1); tie(nx,ny) = right({x,y},d,r);
+      return cnt + leq(nx, ny, k, m + 1, r, d + 1);
+    } else {
+      tie(nx, ny) = left({x, y}, d, l);
+      return leq(nx, ny, k, l, m, d + 1);
+    }
+  }
+  Int rmin(int x, int y, int l=1, int r=n, int d=0) {return kth(x, y, 1, l, r, d);}
+  Int rmax(int x, int y, int l=1, int r=n, int d=0) {return kth(x, y, y-x+1, l, r, d);}
+  Int floor(int x, int y, Int k, int l = 1, int r = n, int d = 0) {
+    if (x > y)return INT_MIN;
+    if (l == r) {
+      if (l > y || l < x)return INT_MIN;
+      return (tree[d][l] <= k ? tree[d][l] : INT_MIN);
+    } Int ans = INT_MIN; int m = (l + r) >> 1, nx, ny;
+    if (s[m] <= k) {
+      tie(nx, ny) = right({x, y}, d, r);
+      ans = max(ans, floor(nx, ny, k, m + 1, r, d + 1));
+      if (ans == INT_MIN) {
+        tie(nx, ny) = left({x, y}, d, l);
+        auto an = rmax(nx, ny, l, m, d + 1);
+        if (an != unfound)ans = max(ans, an);
+      }
+    } else {
+        tie(nx, ny) = left({x, y}, d, l);
+        ans = max(ans, floor(nx, ny, k, l, m, d + 1));
+    } return ans;
+  }
+  Int ceil(int x, int y, Int k, int l=1, int r=n, int d=0){
+    if (l == r) {
+      if (l > y || l < x)return INT_MAX;
+      return (tree[d][l] >= k ? tree[d][l] : INT_MAX);
+    } Int ans = INT_MAX; int m = (l + r) >> 1, nx, ny;
+    if (s[m] >= k) {
+      tie(nx, ny) = left({x, y}, d, l);
+      ans = min(ans, ceil(nx, ny, k, l, m, d + 1));
+      if (ans == INT_MAX) {
+        tie(nx, ny) = right({x, y}, d, r);
+        auto an = rmin(nx, ny, m + 1, r, d + 1);
+        if (an != unfound)ans = min(ans, an);
+      }
+    } else {
+        tie(nx, ny) = right({x, y}, d, r);
+        ans = min(ans, ceil(nx, ny, k, m + 1, r, d + 1));
+    } return ans;
+  }
+} wvt;
