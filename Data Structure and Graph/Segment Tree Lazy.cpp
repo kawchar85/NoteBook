@@ -1,33 +1,40 @@
-int n,a[siz],tree[4*siz],lazy[4*siz];
-void dolazy(int par,int l,int r){
-  tree[par]+=lazy[par];
+ll arr[MAX]; int N;
+struct info{
+  ll lazy,val; info() {lazy=0LL; val=0LL; }
+}tree[3*MAX];
+void propagate(int node, int l, int r) {
+  tree[node].val+=tree[node].lazy*(r-l+1);
   if(l!=r){
-      lazy[2*par]+=lazy[par]; lazy[2*par+1]+=lazy[par]; }
-  lazy[par] = 0;  }
-void build(int par=1,int l=0,int r=n-1){
-  if(l == r){ tree[par] = a[l]; return; }
-  int mid = l+r>>1;
-  build(2*par,l,mid); build(2*par+1,mid+1,r);
-  tree[par] = min(tree[2*par],tree[2*par+1]); }
-int get_min(int par,int l,int r,int L,int R){
-  dolazy(par,l,r);
-  if(r<L or l>R) return 1e9;
-  if(l>=L and r<=R) return tree[par];
-  int mid = l+r>>1;
-  return min(get_min(2*par,l,mid,L,R), get_min(2*par+1,mid+1,r,L,R)); }
-void upd(int par,int l,int r,int L,int R,int val){
-  dolazy(par,l,r);
-  if(r<L or l>R) return;
-  if(l>=L and r<=R){
-      lazy[par] += val; dolazy(par,l,r); return; }
-  int mid = l+r>>1;
-  upd(2*par,l,mid,L,R,val); upd(2*par+1,mid+1,r,L,R,val);
-  tree[par] = min(tree[2*par],tree[2*par+1]); }
-int mins(int l,int r){ return get_min(1,1,n,l,r); }
-void up(int l,int r,int val){ upd(1,1,n,l,r,val); }
-//Kawchar
+    tree[2*node].lazy+=tree[node].lazy;
+    tree[2*node+1].lazy+=tree[node].lazy;
+  } tree[node].lazy=0; }
+ll merge(ll x, ll y) {return x+y;}
+void build(int node, int l,int r) {
+  if(l==r){
+    tree[node].lazy=0;tree[node].val=arr[l]; return;}
+  int mid=(l+r)/2;
+  build(node*2,l,mid);build(node*2+1,mid+1,r);
+  tree[node].lazy=0LL;
+  tree[node].val=merge(tree[node*2].val,tree[2*node+1].val);}
+ll query(int node,int l,int r,int i,int j){
+  propagate(node,l,r); if(i>r || j<l) return 0LL;
+  if(l>=i && r<=j) return tree[node].val;
+  int mid=(l+r)/2;
+  auto x=query(node*2,l,mid,i,j);
+  auto y=query(node*2+1,mid+1,r,i,j);return merge(x,y);}
 int searchQuery(int node, int l, int r, ll sum) {
   propagate(node,l,r); int mid=(l+r)/2;
-  if(l==r) return l;  ll x=tree[2*node].val;
+  if(l==r) return l; ll x=tree[2*node].val;
   if(sum<=x) return searchQuery(2*node, l, mid, sum);
-  else return searchQuery(2*node+1, mid+1, r, sum-x); }
+  else return searchQuery(2*node+1, mid+1, r, sum-x);}
+void update(int node,int l,int r,int i,int j,ll val){
+  propagate(node,l,r); if(i>r || j<l) return;
+  if(l>=i && r<=j) {
+    tree[node].lazy+=val;propagate(node,l,r);return;}
+  int mid=(l+r)/2; update(node*2,l,mid,i,j,val);
+  update(node*2+1,mid+1,r,i,j,val);
+  tree[node].val=merge(tree[node*2].val,tree[node*2+1].val);}
+void build(int n){ N=n; build(1,0,N-1);}
+void update(int i, int j, ll val){
+  update(1,0,N-1,i,j,val); }
+ll query(int x, int y){ return query(1,0,N-1,x,y); }
