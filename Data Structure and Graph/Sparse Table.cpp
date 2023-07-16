@@ -1,10 +1,3 @@
-//Samaun Bhai
-int find_min(int l,int r){
-  int k = log2(r-l+1); //longest power of two
-  int extra = r-l+1-(1<<k);
-  return min(sp[l][k],sp[l+extra][k]);
-}
-//Kawchar
 #define LVL 20 //ceil(log_2(MAXN))+1
 int arr[MAX], dst[MAX][LVL];
 int merge(int x, int y) { return __gcd(x,y); }
@@ -17,7 +10,6 @@ void build(int n){
 int query(int l, int r){
   int k=31-__builtin_clz(r-l+1);
   return merge(dst[l][k], dst[r-(1<<k)+1][k]);  }
-
 //2D Sparse Table: O(n^2 (logn)^2
 int A[MAXN][MAXN]; int M[MAXN][MAXN][LOGN][LOGN];
 void Build2DSparse(int N){ //1 based
@@ -34,7 +26,6 @@ void Build2DSparse(int N){ //1 based
         for(int q=0; (1<<q) <= N; q++){
           for(int j=1; j<= N; j++)
             M[i][j][p][q] = merge(M[i][j][p-1][q], M[i+add][j][p-1][q]);  } }  } }
-
 //merge() of all A[i][j], where x1<=i<=x2 and y1<=j<=y2
 int Query(int x1,int y1,int x2,int y2){
   int kX = log2(x2-x1+1); int kY = log2(y2-y1+1);
