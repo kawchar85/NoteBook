@@ -1,3 +1,4 @@
+//count unique
 #define B_SIZE 550 ///sqrt(MAX)
 struct query{ int l,r,id; };
 query Q[MAX]; int ar[MAX], ans[MAX], fre[1000006],cnt=0;
@@ -18,3 +19,18 @@ void MO(int q) {
     while(cur_l<L)  sub(cur_l++);
     while(cur_r>R)  sub(cur_r--);
     ans[Q[i].id]=get_ans();  } }
+//most frequent value
+void add(int pos){
+  if(cnt[ar[pos]] != 0) fre[cnt[ar[pos]]]--;
+  cnt[ar[pos]]++; fre[cnt[ar[pos]]]++;
+  max_cnt=max(max_cnt, cnt[ar[pos]]);}
+void sub(int pos){
+  if(cnt[ar[pos]] != 0) fre[cnt[ar[pos]]]--;
+  if(fre[max_cnt]==0) max_cnt--;
+  if(max_cnt<1) max_cnt=1;  cnt[ar[pos]]--;
+  if(cnt[ar[pos]] != 0) fre[cnt[ar[pos]]]++; }
+//cnt sub-array of xor K
+void add(int pos){cnt+=fre[ar[pos]^k];fre[ar[pos]]++;}
+void sub(int pos){fre[ar[pos]]--;cnt-=fre[ar[pos]^k];}
+main(){ ar[i]^=ar[i-1]; Q[i].r=R;
+Q[i].l=L-1; //cum[1...x]^cum[1...L-1]=cum[1...L]
