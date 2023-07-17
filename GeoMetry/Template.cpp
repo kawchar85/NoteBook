@@ -533,44 +533,6 @@ ld polygon_line_intersection(VPT &p, PT a, PT b){
     if (j) ans += vec[i + 1].first - vec[i].first; }
   ans = ans / sqrt(dot(l.v, l.v)); p.pop_back();
   return ans; }
-ld dist_from_point_to_polygon(VPT &v, PT p){
-  int n = (int)v.size();
-  if(n <= 3) { ld ans = inf; for(int i = 0; i < n; i++) ans = min(ans, dist_from_point_to_seg(v[i], v[(i + 1) % n], p));  return ans; }
-  PT bscur, bs = angle_bisector(v[n - 1], v[0], v[1]);
-  int ok,i,pw=1,ans=0,sgncur,sgn=sign(cross(bs,p-v[0]));
-  while(pw <= n) pw <<= 1;
-  while((pw >>= 1)) {
-    if((i = ans + pw) < n) {
-      bscur=angle_bisector(v[i-1],v[i],v[(i+1)%n]);
-      sgncur = sign(cross(bscur, p - v[i]));
-      ok = sign(cross(bs, bscur)) >= 0 ? (sgn >= 0 || sgncur <= 0) : (sgn >= 0 && sgncur <= 0);
-      if (ok) ans = i, bs = bscur, sgn = sgncur; } }
-  return dist_from_point_to_seg(v[ans],v[(ans+1)%n],p); }
-ld dist_from_polygon_to_line(VPT &p,PT a,PT b,int top){ PT orth = (b - a).perp();
-  if(orientation(a, b, p[0]) > 0) orth = (a - b).perp();
-  int id = extreme_vertex(p, orth, top);
-  if(dot(p[id] - a, orth) > 0) return 0.0;
-  return dist_from_point_to_line(a, b, p[id]); }
-ld dist_from_polygon_to_polygon(VPT &p1, VPT &p2){
-  ld ans = inf; //NLogN
-  for(int i = 0; i < p1.size(); i++)
-    ans=min(ans, dist_from_point_to_polygon(p2, p1[i]));
-  for(int i = 0; i < p2.size(); i++)
-    ans=min(ans, dist_from_point_to_polygon(p1, p2[i]));
-  return ans; }
-ld maximum_dist_from_polygon_to_polygon(VPT &u, VPT &v){
-  int n=u.size(), m=v.size(); ld ans = 0; //0(n)
-  if(n < 3 || m < 3) {
-    for(int i = 0; i < n; i++) {
-    for(int j=0; j<m; j++) ans=max(ans,dist2(u[i],v[j]));
-    } return sqrt(ans); }
-  if(u[0].x > v[0].x) swap(n, m), swap(u, v);
-  int i = 0, j = 0, step = n + m + 10;
-  while (j + 1 < m && v[j].x < v[j + 1].x) j++ ;
-  while (step--) {
-  if(cross(u[(i+1)%n]-u[i],v[(j+1)%m]-v[j])>=0) j=(j+1)%m;
-  else i = (i + 1) % n; ans = max(ans, dist2(u[i], v[j]));
-  }  return sqrt(ans);  }
 pair<PT,int> point_poly_tangent(VPT &p,PT Q,int dir,int l,int r){
   while(r - l > 1) {
     int mid = (l + r) >> 1;
@@ -596,6 +558,49 @@ pair<int,int> tangents_from_point_to_polygon(VPT &p,PT Q){
   int cw=point_poly_tangent(p,Q,1,0,p.size()-1).second;
   int ccw=point_poly_tangent(p,Q,-1,0,p.size()-1).second;
   return make_pair(cw, ccw);  }
+// minimum distance from a point to a convex polygon
+// it assumes point does not lie strictly inside the polygon
+ld dist_from_point_to_polygon(vector<PT> &p, PT z) {
+  ld ans = inf; int n = p.size();
+  if (n <= 3) {
+    for(int i = 0; i < n; i++) ans = min(ans, dist_from_point_to_seg(p[i], p[(i + 1) % n], z));
+    return ans; }
+  auto [r, l] = tangents_from_point_to_polygon(p, z);
+  if(l > r) r += n;
+  while (l < r) {
+    int mid = (l + r) >> 1;
+    ld left = dist2(p[mid % n], z), right= dist2(p[(mid + 1) % n], z);
+    ans = min({ans, left, right});
+    if(left < right) r = mid; else l = mid + 1; }
+  ans = sqrt(ans);
+  ans = min(ans, dist_from_point_to_seg(p[l % n], p[(l + 1) % n], z));
+  ans = min(ans, dist_from_point_to_seg(p[l % n], p[(l - 1 + n) % n], z));
+  return ans; }
+ld dist_from_polygon_to_line(VPT &p,PT a,PT b,int top){ PT orth = (b - a).perp();
+  if(orientation(a, b, p[0]) > 0) orth = (a - b).perp();
+  int id = extreme_vertex(p, orth, top);
+  if(dot(p[id] - a, orth) > 0) return 0.0;
+  return dist_from_point_to_line(a, b, p[id]); }
+ld dist_from_polygon_to_polygon(VPT &p1, VPT &p2){
+  ld ans = inf; //NLogN
+  for(int i = 0; i < p1.size(); i++)
+    ans=min(ans, dist_from_point_to_polygon(p2, p1[i]));
+  for(int i = 0; i < p2.size(); i++)
+    ans=min(ans, dist_from_point_to_polygon(p1, p2[i]));
+  return ans; }
+ld maximum_dist_from_polygon_to_polygon(VPT &u, VPT &v){
+  int n=u.size(), m=v.size(); ld ans = 0; //0(n)
+  if(n < 3 || m < 3) {
+    for(int i = 0; i < n; i++) {
+    for(int j=0; j<m; j++) ans=max(ans,dist2(u[i],v[j]));
+    } return sqrt(ans); }
+  if(u[0].x > v[0].x) swap(n, m), swap(u, v);
+  int i = 0, j = 0, step = n + m + 10;
+  while (j + 1 < m && v[j].x < v[j + 1].x) j++ ;
+  while (step--) {
+  if(cross(u[(i+1)%n]-u[i],v[(j+1)%m]-v[j])>=0) j=(j+1)%m;
+  else i = (i + 1) % n; ans = max(ans, dist2(u[i], v[j]));
+  }  return sqrt(ans);  }
 //n polygons(not necessarily convex). points within each polygon must be given in CCW order. O(N^2), N total points
 ld rat(PT a, PT b, PT p) {
   return !sign(a.x - b.x) ? (p.y - a.y) / (b.y - a.y) : (p.x - a.x) / (b.x - a.x); };
@@ -668,7 +673,7 @@ VPT half_plane_intersection(vector<HP> h) {
 VPT minkowski_sum(VPT &a, VPT &b) {
   int n = a.size(), m = b.size(),i = 0, j = 0; VPT c;
   c.push_back(a[i] + b[j]);
-  while(i + 1 < n || j + 1 < m){
+  while(1){
     PT p1=a[i]+b[(j+1)% m], p2=a[(i+1)%n]+b[j];
     int t = orientation(c.back(), p1, p2);
     if(t>=0) j=(j+1)%m; if(t<=0) i=(i+1)%n, p1=p2;
