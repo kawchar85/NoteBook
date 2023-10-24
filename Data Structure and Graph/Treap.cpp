@@ -15,6 +15,16 @@ void propagate(int t){
   int l = tree[t].l, r = tree[t].r;
   if(~l) tree[l].rev ^= 1;  if(~r) tree[r].rev ^= 1;
   swap(tree[t].l, tree[t].r);  tree[t].rev = 0; }
+void propagate_lazy(int t) { //if need
+  if(t==-1)return; tree[t].val+=tree[t].lazy;
+  tree[t].ans += tree[t].lazy*tree[t].sz;
+  int l = tree[t].l, r = tree[t].r;
+  if(~l) { tree[l].rev ^= tree[t].rev;
+    tree[l].lazy += tree[t].lazy; } 
+  if(~r) { tree[r].rev ^= tree[t].rev;
+    tree[r].lazy += tree[t].lazy; }
+  if(tree[t].rev) swap(tree[t].l, tree[t].r);
+  tree[t].lazy = 0; tree[t].rev = 0; }
 void calibrate(int t){
   //push up: L,R-->Par
   propagate(t); //need?
@@ -39,17 +49,6 @@ pair<int,int> split(int t, int key){
     ret = split(l, key); tree[t].l = ret.second;
     ret.second = t; }
   calibrate(t); return ret; }
-//only for sorted list
-pair<int,int> split_by_value(int t, int val){
-  propagate(t); if(t == -1) return {-1, -1};
-  pair<int,int> ret; int l = tree[t].l, r = tree[t].r;
-  if(tree[t].val <= val){
-    ret = split_by_value(r, val); tree[t].r = ret.first;
-    ret.first = t;
-  }else{
-    ret = split_by_value(l, val); tree[t].l = ret.second;
-    ret.second = t; }
-  calibrate(t); return ret; }
 //v[0] = [1, l-1], v[1] = [l, r], v[2] = [r+1, N]
 vector<int> parts(int l, int r){
   vector<int> v(3); auto cur = split(treap, l - 1);
@@ -69,6 +68,7 @@ int merge(int a, int b, int c){
 int query(int l, int r){
   auto p = parts(l, r); int ret = tree[ p[1] ].ans;
   treap = merge(p[0], p[1], p[2]); return ret ; }
+int getVal(int pos) {return query(pos, pos); }
 void erase(int l, int r){
   auto p = parts(l, r); treap = merge(p[0], p[2]);  }
 void update(int i, int val){
@@ -92,12 +92,22 @@ void print(int t = treap, int last = 1){
   propagate(t); if(t == -1) return;
   print(tree[t].l, 0); cout << tree[t].val << ' ';
   print(tree[t].r, 0); if(last) cout << "\n";  }
-//for sorted list
-int lower_bound(int val){
+//only for sorted list
+pair<int,int> split_by_value(int t, int val){
+  propagate(t); if(t == -1) return {-1, -1};
+  pair<int,int> ret; int l = tree[t].l, r = tree[t].r;
+  if(tree[t].val <= val){
+    ret = split_by_value(r, val); tree[t].r = ret.first;
+    ret.first = t;
+  }else{
+    ret = split_by_value(l, val); tree[t].l = ret.second;
+    ret.second = t; }
+  calibrate(t); return ret; }
+int order_ok_key(int val){
   //[<val][val][>val]
   auto p = split_by_value(treap, val);
   auto p2 = split_by_value(p.first, val-1);
-  int pos = 1; if(~p2.first) pos += tree[p2.first].sz;
+  int pos=1; if(~p2.first) pos += tree[p2.first].sz;
   treap = merge(p2.first, p2.second, p.second);
   return pos; }
 int find_pos(int val){
@@ -108,3 +118,7 @@ int find_pos(int val){
   else if(~p2.first) pos += tree[p2.first].sz;
   treap = merge(p2.first, p2.second, p.second);
   return pos;  }
+int lower_bound(int val){
+  int pos = order_ok_key(val);
+  if(pos == N-1) return INF; return getVal(pos); }
+int upper_bound(int val){return lower_bound(val+1);}
