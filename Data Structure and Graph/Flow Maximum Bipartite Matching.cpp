@@ -54,3 +54,17 @@ void solve() {
   ans = M.maximum_matching();
   //i --> M.match[i]
 }
+//bipartite graph maximum pair matching kuhn's O(n*m)
+vi adj[MAX];bool used[MAX]; int matchR[MAX];
+bool try_kuhn(int v) {
+  if(used[v]) return 0; used[v] = true;
+  for(int to : adj[v]) {
+    if(matchR[to] == -1 || try_kuhn(matchR[to])){
+      matchR[to] = v; return 1; } } return 0; }
+void maxBPM(int n) {
+  memset(matchR, -1, sizeof matchR); int total=0;
+  for(int i=1; i<=n; i++) {
+    memset(used, 0, sizeof used);total+=try_kuhn(i);}
+  cout<<total<<endl;
+  for(int i=1; i<=n; i++)
+    if(matchR[i]!=-1) cout<<matchR[i]<<" "<<i<<endl;}
