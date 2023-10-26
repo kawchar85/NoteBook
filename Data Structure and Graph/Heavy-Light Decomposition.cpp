@@ -1,10 +1,10 @@
-// z[i]=longest common prefix between s[1...n], s[i...n]
 int sz[MX],par[MX],dep[MX],val[MX],id[MX],tp[MX],ct;
 int tree[3*MX], arr[MX], N, lazy[3*MX];
 // here seg tree //
 void dfs_sz(int u, int p) {
   sz[u] = 1; par[u] = p; for (int v : adj[u]) {
     if (v == p) continue; dep[v] = dep[u] + 1;
+    //edgeToNode[i] = v; value of i'th edge in node v
     par[v] = u; dfs_sz(v, u); sz[u] += sz[v]; } }
 void dfs_hld(int u, int p, int top) {
   id[u] = ct++; tp[u] = top;
@@ -20,8 +20,17 @@ int pathQuery(int x, int y) { int ret = INT_MIN;
     ret = merge(ret, query(id[tp[x]], id[x]));
     x = par[tp[x]];
   } if (dep[x] > dep[y]) swap(x, y);
+  // id[x] + 1 to id[y] in case values are in edge
   ret = merge(ret, query(id[x], id[y])); return ret; }
+void updatePath(int x, int y, int add) {
+  while (tp[x] != tp[y]) {
+    if (dep[tp[x]] < dep[tp[y]]) swap(x, y);
+    update(id[tp[x]], id[x], add); x = par[tp[x]];
+  } if (dep[x] > dep[y]) swap(x, y);
+  update(id[x], id[y], add); }
 void updateNode(int u, int val) {update(id[u], val); }
+void updateEdge(int u, ll val) { 
+  update(id[edgeToNode[u]], val); }
 void updateSubTree(int u, int val) {
   update(id[u], id[u]+sz[u]-1, val);}
 void init_hld(int n) {
