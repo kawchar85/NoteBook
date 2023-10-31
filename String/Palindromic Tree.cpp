@@ -42,6 +42,7 @@ reverse(s);p.init(s,pref);reverse(pref);
 void init(string &ss, vi &v) {
   //...//palindrom end in pos i=endHere[t]
   v.push_back(endHere[t]); /*....*/ }
+//common palindrom?
 void add(int p, int sId) {
   /*...*/ occ[t][sId]++; }
 ll init(string &s1, string &s2) {
