@@ -1,7 +1,8 @@
 /* z[i]=longest common prefix between s[1...n], s[i...n]
 z[i]+i==n suffix matches with prefix
 search: for(int i=0; i<t.size(); i++)
-if(z[i+p.size()+1]==p.size()) found i; */
+if(z[i+p.size()+1]==p.size()) found i; 
+compress: i if(n%i==0 && i+z[i]==n)*/
 vector<int> z_function(string s){
   int n = (int) s.length(); vector<int> z(n); /*z[0]=n;*/
   for(int i=1, l=0, r=0; i<n; ++i) {
