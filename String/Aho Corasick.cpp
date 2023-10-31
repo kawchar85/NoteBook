@@ -31,8 +31,8 @@ struct aho_corasick{
         for(auto &id : aho[aho[v].link].idx)
             aho[v].idx.push_back(id);
         q.push(v); } } }
-  int CNT(string &s, vector<string> &v){
-    //text,list of pattern,int n=v.size();vector<int>pos[n];
+  int process(string &s, vector<string> &v){
+    //v: list of pattern,int n=v.size();vector<int>pos[n];
     int u=0,sum=0;
     for(int i=0; i<s.size(); i++){
       int x=ID(s[i]); u=transition(u, x);
@@ -40,10 +40,14 @@ struct aho_corasick{
       //for(auto id : aho[u].idx) pos[id].push_back(i);
     }
     /*for(int i=0; i<n; i++){
-      bool sp=0;
       for(auto p : pos[i]){
-        if(sp) cout<<" "; cout<<p-v[i].size()+1; sp=1;
-      } cout<<endl; } */
+        cout<<" "; cout<<p-v[i].size()+1;} cout<<endl; }*/
+    /*vector< int > st[s.size() + 10]; pref[0] = 1;
+		i=0...s.size(): pref[i+1] += pref[i+2-v[id].size()];
+		st[i-v[id].size()+1].push_back(v[id].size());
+		suff[s.size() + 1] = 1;
+		i=s.size()-1 ... 0 //#way to make suffix
+		for(len : st[i]) suff[i + 1] += suff[i + len + 1];*/
     return sum; }
   void clear(){
     aho.clear();aho.emplace_back();  } };
@@ -56,3 +60,5 @@ int solve(int pos, int state) {
   int x=solve(pos+1, ac.transition(state, ac.ID(s[pos])));
   int y = 1+solve(pos+1, state);
   return dp[pos][state]=min( x , y); }
+main() { aho_corasick ac; ac.ADD(s, i);
+    ac.push_links(); ac.process(text); ac.clear();}
