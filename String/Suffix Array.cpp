@@ -104,7 +104,6 @@ main(){ s+="$"; vector<int> v=build_suffix_array(s);
   cin>>t>>k; x = Lower(v); y = Uppwer(v);
   if((y-x)<k){pos=-1;} else pos =  1 + wt.kth(x+1, y, k) }
 //O(N)
-/*z[i]=longest common prefix between s[1...n],s[i...n]*/
 const int N = 3e5 + 9, LG = 18; typedef vector<int> vi;
 void induced_sort(const vi &vec, int val_range, vi &SA, const vector<bool> &sl, const vi &lms_idx){
   vi l(val_range, 0), r(val_range, 0);
