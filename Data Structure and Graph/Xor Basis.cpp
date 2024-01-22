@@ -1,9 +1,7 @@
 struct XorBasis{
   vector<ll> basis; ll N=0,tmp=0;
-  void add(ll x){
-    N++; tmp|=x;
-    for(auto &i : basis) x=min(x,x^i);
-    if(!x) return;
+  void add(ll x){ N++; tmp|=x;
+    for(auto &i : basis) x=min(x,x^i); if(!x) return;
     for(auto &i : basis) if((i^x)<i) i^=x;
     basis.push_back(x); sort(basis.begin(),basis.end());}
   ll size(){ return (ll)basis.size(); }
@@ -18,8 +16,7 @@ struct XorBasis{
     if(!possible(x)) return 0; return (1LL<<(N-size()));}
   ll sumOfAll(){
     ll ans=tmp*(1LL<<(N-1)); return ans; }
-  ll kth(ll k){
-    ll sz=size(); if(k > (1LL<<sz)) return -1;
+  ll kth(ll k){ ll sz=size(); if(k > (1LL<<sz)) return -1;
     k--; ll ans=0;
     for(ll i=0; i<sz; i++) if(k>>i & 1) ans^=basis[i];
     return ans;  }  }xb;
