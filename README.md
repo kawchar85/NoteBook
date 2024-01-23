@@ -8,3 +8,5 @@ codes2pdf ./ --author "SUST\_Londoni\_Sisters" --initials "Shahjalal University 
 
 codes2pdf ./ --author "SUST\\_Scrumping\\_Puppets" --initials "Shahjalal University of Science and Technology - SUST\\_Scrumping\\_Puppets"
 
+codes2pdf ./ --author "SUST\\_Scrumping\\_Puppets\\_2.0" --initials "Shahjalal University of Science and Technology - SUST\\_Scrumping\\_Puppets\\_2.0"
+
