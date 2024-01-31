@@ -34,7 +34,12 @@ struct SuffixAutomata {
   ll unique_substrings() { /*O(N)*/ ll tot = 0;
     for(int i = 1; i < sz; i++)
         tot += t[i].len - t[t[i].link].len;
-    return tot;  }
+    return tot;
+    /*vector<int> unq; // unq[i] = unique substring in prefix of length i
+      unq.push_back(0);
+      for(int i = 0; i < n; i++) { extend(s[i]);
+	      ans.push_back(unq.back() + i + 1 - t[t[last].link].len);
+    }*/  }
   ll tot_len_diff_substings() { ll tot = 0;
     for(int i = 1; i < sz; i++) {
       ll shortest = t[t[i].link].len + 1;
